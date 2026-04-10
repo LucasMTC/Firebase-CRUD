@@ -1,3 +1,4 @@
+import 'dotenv/config';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -8,13 +9,13 @@ import { getFirestore } from "firebase/firestore";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBNj9xVo2AprNrx7U9-DRS2m2E9uax0oPQ",
-  authDomain: "crud-firebase-47685.firebaseapp.com",
-  projectId: "crud-firebase-47685",
-  storageBucket: "crud-firebase-47685.firebasestorage.app",
-  messagingSenderId: "657149838601",
-  appId: "1:657149838601:web:ad3443aad846e92e56ffd8",
-  measurementId: "G-9EDVC8YNW1"
+  apiKey: process.env.NEXT_PUBLIC_APIKEY,
+  authDomain: process.env.NEXT_PUBLIC_AUTHDOMAIN,
+  projectId: process.env.NEXT_PUBLIC_PROJECTID,
+  storageBucket: process.env.NEXT_PUBLIC_STORAGEBUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_MESSAGINGSENDERID,
+  appId: process.env.NEXT_PUBLIC_APPID,
+  measurementId: process.env.NEXT_PUBLIC_MEASUREMENTID,
 };
 
 // Initialize Firebase
