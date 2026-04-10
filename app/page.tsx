@@ -1,65 +1,105 @@
-import Image from "next/image";
+'use client'
+import { useEffect, useState } from 'react'
+import { addDoc, collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { db } from '../firebase/firebase.config';
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    const [nombre, setNombre] = useState('');
+    const [matricula, setMatricula] = useState('');
+    const [carrera, setCarrera] = useState('');
+    const [items, setItems] = useState<any>([]);
+
+    useEffect(() => {
+        fetchItems()
+    }, [])
+
+    const handleAdd = async () => {
+        await addDoc(collection(db, 'estudiantes'), { nombre, matricula, carrera })
+        setNombre('');
+        setMatricula('');
+        setCarrera('');
+        fetchItems();
+    }
+
+    const handleDelete = async (id:string) => {
+        if (!id) return;
+        await deleteDoc(doc(db, 'estudiantes', id));
+        fetchItems();
+    }
+
+    const handleEdit = async (id:string) => {
+        const newNombre = prompt("Enter new nombre");
+        const newMatricula = prompt("Enter new matricula");
+        const newCarrera = prompt("Enter new carrera");
+
+        if (!newNombre || !newMatricula || !newCarrera) return;
+
+        await updateDoc(doc(db, 'estudiantes', id), {
+            nombre: newNombre,
+            matricula: newMatricula,
+            carrera: newCarrera
+        })
+
+        fetchItems();
+    }
+
+    const fetchItems = async () => {
+        const snapshot = await getDocs(collection(db, 'estudiantes'))
+        setItems(snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+        })))
+    }
+
+    return (
+        <div className="font-sans flex flex-col items-center min-h-screen p-8 gap-4">
+            <h1>NextJS Firebase</h1>
+
+            <input
+                type="text"
+                className="border-2"
+                placeholder="Nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+            <input
+                type="text"
+                className="border-2"
+                placeholder="Matricula"
+                value={matricula}
+                onChange={(e) => setMatricula(e.target.value)}
+            />
+
+            <input
+                type="text"
+                className="border-2"
+                placeholder="Carrera"
+                value={carrera}
+                onChange={(e) => setCarrera(e.target.value)}
+            />
+
+            <button className="border p-2" onClick={handleAdd}>Agregar</button>
+
+            <ul>
+                {items.map((item:any) => (
+                    <li key={item.id}>
+                        {item.nombre} - {item.matricula} - {item.carrera}
+
+                        <button
+                            className="p-2 border bg-yellow-500 text-white cursor-pointer"
+                            onClick={() => { handleEdit(item.id) }}>
+                            Edit
+                        </button>
+
+                        <button
+                            className="p-2 border bg-red-500 text-white cursor-pointer"
+                            onClick={() => { handleDelete(item.id) }}>
+                            Delete
+                        </button>
+                    </li>
+                ))}
+            </ul>
         </div>
-      </main>
-    </div>
-  );
+    );
 }
